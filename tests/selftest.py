@@ -8,6 +8,12 @@ import sys
 
 import numpy as np
 
+for _st in (sys.stdout, sys.stderr):  # консоль Windows может быть в cp1252/cp866
+    try:
+        _st.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from dustheal.core.detect import detect_spots  # noqa: E402
 from dustheal.core.heal import heal_all, to_float  # noqa: E402

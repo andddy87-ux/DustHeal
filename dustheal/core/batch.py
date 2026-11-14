@@ -125,13 +125,16 @@ def run_batch(files, template, opt: BatchOptions, on_progress=None, should_stop=
             done += 1
             try:
                 out, rep = fut.result()
+                ok, msg = True, f"{os.path.basename(out)} — {rep}"
                 results.append((p, True, out))
-                if on_progress:
-                    on_progress(done, total, p, True, f"{os.path.basename(out)} — {rep}")
             except Exception as e:  # noqa: BLE001
-                results.append((p, False, str(e)))
-                if on_progress:
-                    on_progress(done, total, p, False, str(e))
+                ok, msg = False, str(e)
+                results.append((p, False, msg))
+            if on_progress:
+                try:  # сбой вывода отчёта не должен считаться ошибкой обработки
+                    on_progress(done, total, p, ok, msg)
+                except Exception:  # noqa: BLE001
+                    pass
             if should_stop and should_stop():
                 for f in futs:
                     f.cancel()

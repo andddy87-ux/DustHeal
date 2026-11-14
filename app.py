@@ -15,6 +15,7 @@ def _attach_console():
         try:
             import ctypes
             if ctypes.windll.kernel32.AttachConsole(-1):
+                ctypes.windll.kernel32.SetConsoleOutputCP(65001)
                 sys.stdout = open("CONOUT$", "w", encoding="utf-8", buffering=1)
                 sys.stderr = sys.stdout
         except Exception:
@@ -22,6 +23,11 @@ def _attach_console():
     if sys.stdout is None:
         sys.stdout = open(os.devnull, "w")
         sys.stderr = sys.stdout
+    for st in (sys.stdout, sys.stderr):
+        try:
+            st.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
 
 
 def _cli(argv):
