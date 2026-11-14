@@ -1,0 +1,36 @@
+name: Build Windows exe
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+      - name: Self-test (core algorithms)
+        run: python tests/selftest.py
+      - name: Build
+        run: >
+          pyinstaller --noconfirm --clean --windowed --name DustHeal
+          --icon assets/icon.ico --add-data "assets;assets"
+          --exclude-module tkinter --exclude-module matplotlib app.py
+      - name: Smoke test exe (batch CLI)
+        shell: bash
+        run: |
+          python tests/selftest.py --make-sample sample
+          ./dist/DustHeal/DustHeal.exe --batch sample/map.json --out sample/out sample/in
+          ls sample/out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DustHeal-win64
+          path: dist/DustHeal

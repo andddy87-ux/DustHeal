@@ -1,0 +1,5 @@
+@echo off
+rem Запуск из исходников без сборки exe
+cd /d "%~dp0"
+if not exist .venv (python -m venv .venv && call .venv\Scripts\activate.bat && pip install -r requirements.txt) else call .venv\Scripts\activate.bat
+start "" pythonw app.py %*
